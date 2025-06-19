@@ -1,33 +1,56 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  Users, 
-  Activity, 
-  TrendingUp, 
+  
   Settings, 
   Bell, 
   Search,
-  MoreVertical,
-  ArrowUpRight,
-  Calendar,
-  Filter,
-  Download,
-  Sparkles,
-  BarChart3,
-  PieChart,
-  Target,
+  
   UserPlus,
-  ArrowUp,
-  DollarSign,
-  User,
-  ArrowDown,
-  FileText
+  
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  async function fetchUsers() {
+    setLoadingUsers(true);
+    const res = await fetch("/api/admin/users");
+    if (res.ok) {
+      setUsers(await res.json());
+    }
+    setLoadingUsers(false);
+  }
+
+  async function handleRemoveUser(id: string) {
+    if (!confirm("Are you sure you want to remove this user?")) return;
+    setRemovingId(id);
+    const res = await fetch("/api/admin/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      setUsers(await res.json());
+      toast.success("User removed");
+    } else {
+      toast.error("Failed to remove user");
+    }
+    setRemovingId(null);
+  }
+
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
       {/* Background */}
@@ -85,138 +108,64 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Stats Cards */}
-            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Users</p>
-                    <h3 className="text-2xl font-bold text-slate-800">2,543</h3>
-                  </div>
-                  <div className="p-3 rounded-full bg-amber-100/50">
-                    <Users className="w-6 h-6 text-[hsl(37.7,92.1%,50.2%)]" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="flex items-center text-sm text-green-600">
-                    <ArrowUp className="w-4 h-4 mr-1" />
-                    <span>12% from last month</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        
 
-            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Active Sessions</p>
-                    <h3 className="text-2xl font-bold text-slate-800">1,234</h3>
-                  </div>
-                  <div className="p-3 rounded-full bg-amber-100/50">
-                    <Activity className="w-6 h-6 text-[hsl(37.7,92.1%,50.2%)]" />
-                  </div>
+        {/* Users Management */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg mb-8">
+            <CardHeader>
+              <CardTitle className="text-slate-800">All Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingUsers ? (
+                <div className="text-slate-600">Loading users...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="bg-amber-100/50">
+                        <th className="px-4 py-2 text-left">Name</th>
+                        <th className="px-4 py-2 text-left">Email</th>
+                        <th className="px-4 py-2 text-left">Role</th>
+                        <th className="px-4 py-2 text-left">Phone</th>
+                        <th className="px-4 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((user) => (
+                        <tr key={user.id} className="border-b last:border-0">
+                          <td className="px-4 py-2">{user.name}</td>
+                          <td className="px-4 py-2">{user.email}</td>
+                          <td className="px-4 py-2 capitalize">{user.role}</td>
+                          <td className="px-4 py-2">{user.phone}</td>
+                          <td className="px-4 py-2">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              disabled={removingId === user.id}
+                              onClick={() => handleRemoveUser(user.id)}
+                            >
+                              {removingId === user.id ? "Removing..." : "Remove"}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="mt-4">
-                  <div className="flex items-center text-sm text-green-600">
-                    <ArrowUp className="w-4 h-4 mr-1" />
-                    <span>8% from last hour</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Revenue</p>
-                    <h3 className="text-2xl font-bold text-slate-800">$45,231</h3>
-                  </div>
-                  <div className="p-3 rounded-full bg-amber-100/50">
-                    <DollarSign className="w-6 h-6 text-[hsl(37.7,92.1%,50.2%)]" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="flex items-center text-sm text-green-600">
-                    <ArrowUp className="w-4 h-4 mr-1" />
-                    <span>23% from last month</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Conversion Rate</p>
-                    <h3 className="text-2xl font-bold text-slate-800">3.2%</h3>
-                  </div>
-                  <div className="p-3 rounded-full bg-amber-100/50">
-                    <TrendingUp className="w-6 h-6 text-[hsl(37.7,92.1%,50.2%)]" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="flex items-center text-sm text-red-600">
-                    <ArrowDown className="w-4 h-4 mr-1" />
-                    <span>2% from last week</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Activity */}
-            <Card className="lg:col-span-2 border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-slate-800">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-start space-x-4">
-                      <div className="p-2 rounded-full bg-amber-100/50">
-                        <User className="w-5 h-5 text-[hsl(37.7,92.1%,50.2%)]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">User {i} logged in</p>
-                        <p className="text-sm text-slate-600">2 hours ago</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-slate-800">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Button className="w-full bg-gradient-to-r from-[hsl(37.7,92.1%,50.2%)] to-[hsl(32.1,94.6%,43.7%)] hover:from-[hsl(37.7,92.1%,45.2%)] hover:to-[hsl(32.1,94.6%,38.7%)] text-white">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Add New User
-                  </Button>
-                  <Button className="w-full bg-gradient-to-r from-[hsl(37.7,92.1%,50.2%)] to-[hsl(32.1,94.6%,43.7%)] hover:from-[hsl(37.7,92.1%,45.2%)] hover:to-[hsl(32.1,94.6%,38.7%)] text-white">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Generate Report
-                  </Button>
-                  <Button className="w-full bg-gradient-to-r from-[hsl(37.7,92.1%,50.2%)] to-[hsl(32.1,94.6%,43.7%)] hover:from-[hsl(37.7,92.1%,45.2%)] hover:to-[hsl(32.1,94.6%,38.7%)] text-white">
-                    <Settings className="w-4 h-4 mr-2" />
-                    System Settings
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+              )}
+            </CardContent>
+          </Card>
+          {/* Orders Management Placeholder */}
+          <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-slate-800">Orders Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-slate-600">Orders management coming soon...</div>
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </div>
   );

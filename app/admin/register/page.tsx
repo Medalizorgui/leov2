@@ -68,6 +68,7 @@ export default function RegisterPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const role = formData.get("role") as string;
+    const phone = formData.get("phone") as string;
 
     try {
       const response = await fetch("/api/register", {
@@ -75,7 +76,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, role, phone }),
       });
 
       if (!response.ok) {
@@ -223,6 +224,20 @@ export default function RegisterPage() {
                     </div>
                   </div>
                   <input type="hidden" name="role" value={role} />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-slate-800 font-semibold">Phone Number</Label>
+                    <div className="relative">
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        required
+                        className="pl-4 bg-white/70 border-amber-200 text-slate-700 placeholder:text-slate-400 focus:border-amber-400 focus:ring-amber-300 transition-all duration-200"
+                      />
+                    </div>
+                  </div>
 
                   {error && (
                     <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">

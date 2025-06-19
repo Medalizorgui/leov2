@@ -17,9 +17,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, password, role } = await req.json();
+    const { name, email, password, role, phone } = await req.json();
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !phone) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -45,11 +45,12 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         role,
+        phone,
       },
     });
 
     return NextResponse.json(
-      { message: "User created successfully", user: { id: user.id, email: user.email, name: user.name, role: user.role } },
+      { message: "User created successfully", user: { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone } },
       { status: 201 }
     );
   } catch (error) {
