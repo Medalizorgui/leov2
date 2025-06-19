@@ -8,7 +8,8 @@ import {
   Search,
   
   UserPlus,
-  
+  FileText,
+  Users
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -108,64 +109,27 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        
-
-        {/* Users Management */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg mb-8">
-            <CardHeader>
-              <CardTitle className="text-slate-800">All Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingUsers ? (
-                <div className="text-slate-600">Loading users...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="bg-amber-100/50">
-                        <th className="px-4 py-2 text-left">Name</th>
-                        <th className="px-4 py-2 text-left">Email</th>
-                        <th className="px-4 py-2 text-left">Role</th>
-                        <th className="px-4 py-2 text-left">Phone</th>
-                        <th className="px-4 py-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((user) => (
-                        <tr key={user.id} className="border-b last:border-0">
-                          <td className="px-4 py-2">{user.name}</td>
-                          <td className="px-4 py-2">{user.email}</td>
-                          <td className="px-4 py-2 capitalize">{user.role}</td>
-                          <td className="px-4 py-2">{user.phone}</td>
-                          <td className="px-4 py-2">
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={removingId === user.id}
-                              onClick={() => handleRemoveUser(user.id)}
-                            >
-                              {removingId === user.id ? "Removing..." : "Remove"}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          {/* Orders Management Placeholder */}
-          <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-slate-800">Orders Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-slate-600">Orders management coming soon...</div>
-            </CardContent>
-          </Card>
-        </section>
+        {/* Main Content: Navigation to management sections */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col md:flex-row gap-8 items-center justify-center">
+          <Link href="/admin/users" className="w-full md:w-1/2">
+            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-8 flex flex-col items-center justify-center">
+                <Users className="w-12 h-12 text-[hsl(37.7,92.1%,50.2%)] mb-4" />
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">User Management</h2>
+                <p className="text-slate-600 text-center">View, manage, and remove users from the system.</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/admin/orders" className="w-full md:w-1/2">
+            <Card className="border-amber-200 bg-white/80 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-8 flex flex-col items-center justify-center">
+                <FileText className="w-12 h-12 text-[hsl(32.1,94.6%,43.7%)] mb-4" />
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">Orders Management</h2>
+                <p className="text-slate-600 text-center">Consult and manage all orders placed by users.</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </main>
       </div>
     </div>
   );
