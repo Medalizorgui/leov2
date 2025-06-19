@@ -36,6 +36,13 @@ export function NavBar() {
             <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-[hsl(37.7,92.1%,50.2%)] to-[hsl(32.1,94.6%,43.7%)] text-white border-none px-2 py-0.5 text-xs">{cart.length}</Badge>
           )}
         </Button>
+        {cart.length > 0 && (
+          <Link href="/checkout">
+            <Button variant="default" className="ml-2">
+              Checkout
+            </Button>
+          </Link>
+        )}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetContent side="right" className="max-w-md w-full bg-white/90 border-amber-200">
             <SheetHeader>
