@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Upload } from "lucide-react"
 import { useCart } from "@/components/providers/next-auth-provider"
 import { toast } from "sonner"
+import { UploadButton } from "@uploadthing/react"
+import type { OurFileRouter } from "@/app/api/uploadthing/route"
 
 type FlagType = "courbé" | "droit" | "incliné" | "rectangulaire"
 type StandardHeight = "2m" | "2m50" | "2m80" | "3m20" | "3m80" | "4m50" | "5m"
@@ -39,8 +41,7 @@ export default function FlagProductPage() {
   const [selectedBase, setSelectedBase] = useState<BaseType | null>(null)
   const [selectedBarre, setSelectedBarre] = useState<BarreType>("with")
   const [customLink, setCustomLink] = useState("")
-  const [customImage, setCustomImage] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null)
   const { addToCart } = useCart()
 
   const getAvailableHeights = () => {
@@ -62,7 +63,7 @@ export default function FlagProductPage() {
       addToCart({
         productId: `flag-${selectedType}-${selectedHeight}-${selectedBase || "no-base"}-${selectedBarre}`,
         name: `Flag ${selectedType} ${selectedHeight}`,
-        image: "/flag.png",
+        image: customImageUrl || "/flag.png",
         quantity: 1,
         options: {
           type: selectedType,
@@ -70,23 +71,10 @@ export default function FlagProductPage() {
           base: selectedBase,
           barre: selectedBarre,
           customLink,
-          customImage: customImage ? customImage.name : undefined,
+          customImage: customImageUrl,
         },
       })
       toast.success("Added to cart!")
-    }
-  }
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setCustomImage(file)
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
-      } else {
-        alert('Please upload an image file (jpg, png, jpeg)')
-      }
     }
   }
 
@@ -322,32 +310,34 @@ export default function FlagProductPage() {
                       </div>
 
                       {/* Custom Image Upload */}
-                      <div className="space-y-2">
-                        <Label htmlFor="customImage" className="text-slate-800">Custom Image</Label>
+                      <Label htmlFor="customImage" className="text-slate-800">Custom Image</Label>
+                      {session ? (
                         <div className="flex flex-col items-center justify-center w-full">
-                          <label
-                            htmlFor="customImage"
-                            className="flex flex-col items-center justify-center w-full h-64 border-2 border-amber-200 border-dashed rounded-lg cursor-pointer bg-white/50 hover:bg-amber-50"
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Upload className="w-8 h-8 mb-4 text-slate-600" />
-                              <p className="mb-2 text-sm text-slate-600">
-                                <span className="font-semibold">Click to upload</span> or drag and drop
-                              </p>
-                              <p className="text-xs text-slate-500">JPG, PNG or JPEG</p>
+                          <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-amber-200 border-dashed rounded-lg bg-white/50 hover:bg-amber-50 transition cursor-pointer">
+                            <Upload className="w-10 h-10 mb-3 text-amber-400" />
+                            <span className="font-semibold text-slate-700 mb-1">Click or drag to upload your image</span>
+                            <span className="text-xs text-slate-500 mb-4">JPG, PNG or JPEG, max 4MB</span>
+                            <div className="w-full flex justify-center">
+                              <UploadButton<OurFileRouter>
+                                endpoint="productImage"
+                                appearance={{
+                                  button: "bg-gradient-to-r from-amber-400 to-orange-400 text-white font-semibold py-2 px-6 rounded-lg shadow hover:from-amber-500 hover:to-orange-500 transition-all duration-200",
+                                  container: "flex flex-col items-center justify-center w-full",
+                                }}
+                                onClientUploadComplete={(res) => {
+                                  if (res && res[0]?.url) {
+                                    setCustomImageUrl(res[0].url);
+                                    toast.success("Image uploaded!");
+                                  }
+                                }}
+                                onUploadError={() => toast.error("Upload failed")}
+                              />
                             </div>
-                            <input
-                              id="customImage"
-                              type="file"
-                              className="hidden"
-                              accept="image/jpeg,image/png,image/jpg"
-                              onChange={handleImageUpload}
-                            />
-                          </label>
-                          {previewUrl && (
+                          </div>
+                          {customImageUrl && (
                             <div className="mt-4">
                               <Image
-                                src={previewUrl}
+                                src={customImageUrl}
                                 alt="Preview"
                                 width={200}
                                 height={200}
@@ -356,7 +346,11 @@ export default function FlagProductPage() {
                             </div>
                           )}
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-amber-200 rounded-lg bg-white/50">
+                          <span className="text-slate-600">Please log in to upload a custom image.</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -394,10 +388,10 @@ export default function FlagProductPage() {
                             <span className="font-medium text-slate-800 truncate max-w-[200px]">{customLink}</span>
                           </div>
                         )}
-                        {customImage && (
+                        {customImageUrl && (
                           <div className="flex justify-between">
                             <span className="text-slate-600">Custom Image:</span>
-                            <span className="font-medium text-slate-800">{customImage.name}</span>
+                            <span className="font-medium text-slate-800">{customImageUrl}</span>
                           </div>
                         )}
                       </div>
