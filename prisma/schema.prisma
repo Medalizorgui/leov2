@@ -45,6 +45,7 @@ model OrderItem {
   productType String
   size        String?
   image       String?
+  originalImage String?
   link        String?
   quantity    Int
   options     Json?
